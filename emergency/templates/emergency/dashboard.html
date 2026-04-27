@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Emergencias de Élite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --green: #00ff88;
+            --yellow: #ffcc00;
+            --red: #ff3333;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .emergency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card.green:hover { box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1); }
+        .card.yellow:hover { box-shadow: 0 20px 40px rgba(255, 204, 0, 0.1); }
+        .card.red:hover { box-shadow: 0 20px 40px rgba(255, 51, 51, 0.1); }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .card.green h2 { color: var(--green); }
+        .card.yellow h2 { color: var(--yellow); }
+        .card.red h2 { color: var(--red); }
+
+        .btn-trigger {
+            margin-top: 2rem;
+            background: white;
+            color: black;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .card.green .btn-trigger:hover { background: var(--green); color: black; }
+        .card.yellow .btn-trigger:hover { background: var(--yellow); color: black; }
+        .card.red .btn-trigger:hover { background: var(--red); color: white; }
+
+        .history {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem;
+        }
+
+        .history h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .signal-list {
+            list-style: none;
+        }
+
+        .signal-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .signal-item:last-child {
+            border-bottom: none;
+        }
+
+        .level-tag {
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag-green { background: rgba(0, 255, 136, 0.1); color: var(--green); }
+        .tag-yellow { background: rgba(255, 204, 0, 0.1); color: var(--yellow); }
+        .tag-red { background: rgba(255, 51, 51, 0.1); color: var(--red); }
+
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Ambient Background */
+        .ambient-light {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            color: black;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 100;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-light"></div>
+    
+    <div class="container">
+        <header>
+            <h1>CENTRO DE COMANDO</h1>
+            <p class="subtitle">Protocolo de Despliegue de Emergencia Multicanal</p>
+        </header>
+
+        <div class="emergency-grid">
+            <!-- Green Card -->
+            <div class="card green" onclick="sendSignal('GREEN')">
+                <span class="icon">🌿</span>
+                <h2>CÓDIGO VERDE</h2>
+                <p>Nivel preventivo. Monitoreo estándar y notificación a servicios locales.</p>
+                <button class="btn-trigger">ACTIVAR SEÑAL</button>
+            </div>
+
+            <!-- Yellow Card -->
+            <div class="card yellow" onclick="sendSignal('YELLOW')">
+                <span class="icon">⚠️</span>
+                <h2>CÓDIGO AMARILLO</h2>
+                <p>Nivel de alerta intermedia. Movilización de unidades de apoyo preventivo.</p>
+                <button class="btn-trigger">ACTIVAR SEÑAL</button>
+            </div>
+
+            <!-- Red Card -->
+            <div class="card red" onclick="sendSignal('RED')">
+                <span class="icon">🚨</span>
+                <h2>CÓDIGO ROJO</h2>
+                <p>Nivel crítico. Despliegue inmediato de todas las unidades de emergencia.</p>
+                <button class="btn-trigger">ACTIVAR SEÑAL</button>
+            </div>
+        </div>
+
+        <div class="history">
+            <h3>Registro de Actividad Reciente</h3>
+            <ul class="signal-list" id="signalList">
+                {% for signal in recent_signals %}
+                <li class="signal-item">
+                    <span class="level-tag tag-{{ signal.level|lower }}">{{ signal.get_level_display }}</span>
+                    <span class="timestamp">{{ signal.timestamp|date:"Y-m-d H:i:s" }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div id="toast">Señal enviada correctamente</div>
+
+    <script>
+        function sendSignal(level) {
+            const formData = new FormData();
+            formData.append('level', level);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            fetch("{% url 'trigger_signal' %}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(`Señal ${level} Desplegada`);
+                    addSignalToList(data);
+                    
+                    // Visual feedback effect
+                    const body = document.body;
+                    const originalBg = body.style.backgroundColor;
+                    const flashColor = level === 'RED' ? '#220000' : (level === 'YELLOW' ? '#221100' : '#001100');
+                    body.style.backgroundColor = flashColor;
+                    setTimeout(() => body.style.backgroundColor = originalBg, 500);
+                }
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function addSignalToList(data) {
+            const list = document.getElementById('signalList');
+            const item = document.createElement('li');
+            item.className = 'signal-item';
+            
+            let label = data.level === 'GREEN' ? 'Código Verde - Bajo' : 
+                        (data.level === 'YELLOW' ? 'Código Amarillo - Intermedio' : 'Código Rojo - Alto');
+            
+            item.innerHTML = `
+                <span class="level-tag tag-${data.level.toLowerCase()}">${label}</span>
+                <span class="timestamp">${data.timestamp}</span>
+            `;
+            list.insertBefore(item, list.firstChild);
+            
+            if (list.children.length > 10) {
+                list.removeChild(list.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>
