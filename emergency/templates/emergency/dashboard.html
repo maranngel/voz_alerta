@@ -303,7 +303,9 @@
         <div class="emergency-grid">
             <!-- Green Card -->
             <div class="card green">
-                <div class="icon-container">🌿</div>
+                <div class="icon-container">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
                 <h2>CÓDIGO VERDE</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Nivel preventivo. Bajo riesgo. Procedimientos de rutina activos.</p>
                 
@@ -318,7 +320,9 @@
 
             <!-- Yellow Card -->
             <div class="card yellow">
-                <div class="icon-container">⚠️</div>
+                <div class="icon-container">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
                 <h2>CÓDIGO AMARILLO</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Alerta intermedia. Situación en desarrollo. Movilización preventiva.</p>
                 
@@ -333,7 +337,9 @@
 
             <!-- Red Card -->
             <div class="card red">
-                <div class="icon-container">🚨</div>
+                <div class="icon-container">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 7v5"/><path d="M9 17h6"/></svg>
+                </div>
                 <h2>CÓDIGO ROJO</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">CRÍTICO. Peligro inminente. Despliegue de fuerza total.</p>
                 
@@ -390,7 +396,11 @@
             const toast = document.createElement('div');
             toast.className = 'toast';
             
-            const icon = level === 'RED' ? '🚨' : (level === 'YELLOW' ? '⚠️' : '🌿');
+            let icon = '';
+            if(level === 'RED') icon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff3b3b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 7v5"/><path d="M9 17h6"/></svg>';
+            else if(level === 'YELLOW') icon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffdd00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+            else icon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00ffaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+            
             toast.innerHTML = `<span>${icon}</span> PROTOCOLO ${level} INICIADO`;
             
             container.appendChild(toast);
