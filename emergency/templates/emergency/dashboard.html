@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Emergencias de Élite</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>VOZ ALERTA - Sistema de Emergencias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #050505;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --green: #00ff88;
-            --yellow: #ffcc00;
-            --red: #ff3333;
+            --bg-color: #030305;
+            --card-bg: rgba(20, 20, 25, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --green: #00ffaa;
+            --yellow: #ffdd00;
+            --red: #ff3b3b;
             --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
+            --text-secondary: #94a3b8;
+            --accent-glow: rgba(255, 255, 255, 0.02);
         }
 
         * {
@@ -33,37 +34,72 @@
             align-items: center;
             padding: 2rem;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% -20%, rgba(50, 50, 80, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 0% 100%, rgba(20, 20, 30, 0.2) 0%, transparent 40%);
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 51%);
+            background-size: 100% 4px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0.1;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
             z-index: 1;
         }
 
         header {
             text-align: center;
-            margin-bottom: 4rem;
+            margin-bottom: 5rem;
+            position: relative;
         }
 
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: -2px;
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 8px;
             margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #fff, #666);
+            background: linear-gradient(to bottom, #fff 30%, #444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+            text-transform: uppercase;
         }
 
-        p.subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            background: rgba(0, 255, 170, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(0, 255, 170, 0.2);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; text-shadow: 0 0 10px var(--green); }
+            100% { opacity: 0.6; }
         }
 
         .emergency-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
             margin-bottom: 4rem;
         }
@@ -71,214 +107,263 @@
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 2.5rem;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .card::before {
+        .card::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         .card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-12px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .card:hover::before {
-            opacity: 1;
+        .card.green:hover { box-shadow: 0 30px 60px rgba(0, 255, 170, 0.15); }
+        .card.yellow:hover { box-shadow: 0 30px 60px rgba(255, 221, 0, 0.15); }
+        .card.red:hover { box-shadow: 0 30px 60px rgba(255, 59, 59, 0.15); }
+
+        .icon-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
         }
 
-        .card.green:hover { box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1); }
-        .card.yellow:hover { box-shadow: 0 20px 40px rgba(255, 204, 0, 0.1); }
-        .card.red:hover { box-shadow: 0 20px 40px rgba(255, 51, 51, 0.1); }
-
-        .icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            display: block;
-        }
+        .card.green .icon-container { background: rgba(0, 255, 170, 0.1); color: var(--green); }
+        .card.yellow .icon-container { background: rgba(255, 221, 0, 0.1); color: var(--yellow); }
+        .card.red .icon-container { background: rgba(255, 59, 59, 0.1); color: var(--red); }
 
         .card h2 {
+            font-family: 'Orbitron', sans-serif;
             font-size: 1.5rem;
-            margin-bottom: 1rem;
             font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
         }
 
-        .card p {
+        .services-list {
+            list-style: none;
+            margin: 1.5rem 0;
+            text-align: left;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 1.5rem;
+        }
+
+        .services-list li {
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.6;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
         }
 
-        .card.green h2 { color: var(--green); }
-        .card.yellow h2 { color: var(--yellow); }
-        .card.red h2 { color: var(--red); }
+        .services-list li::before {
+            content: '•';
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .card.green li::before { color: var(--green); }
+        .card.yellow li::before { color: var(--yellow); }
+        .card.red li::before { color: var(--red); }
 
         .btn-trigger {
-            margin-top: 2rem;
-            background: white;
-            color: black;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.2rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
             cursor: pointer;
             transition: all 0.3s;
-        }
-
-        .card.green .btn-trigger:hover { background: var(--green); color: black; }
-        .card.yellow .btn-trigger:hover { background: var(--yellow); color: black; }
-        .card.red .btn-trigger:hover { background: var(--red); color: white; }
-
-        .history {
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 2rem;
-        }
-
-        .history h3 {
-            margin-bottom: 1.5rem;
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-        }
-
-        .signal-list {
-            list-style: none;
-        }
-
-        .signal-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-color);
-            animation: fadeIn 0.5s ease;
-        }
-
-        .signal-item:last-child {
-            border-bottom: none;
-        }
-
-        .level-tag {
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
             text-transform: uppercase;
         }
 
-        .tag-green { background: rgba(0, 255, 136, 0.1); color: var(--green); }
-        .tag-yellow { background: rgba(255, 204, 0, 0.1); color: var(--yellow); }
-        .tag-red { background: rgba(255, 51, 51, 0.1); color: var(--red); }
+        .card.green .btn-trigger:hover { background: var(--green); color: black; border-color: var(--green); box-shadow: 0 0 20px rgba(0, 255, 170, 0.4); }
+        .card.yellow .btn-trigger:hover { background: var(--yellow); color: black; border-color: var(--yellow); box-shadow: 0 0 20px rgba(255, 221, 0, 0.4); }
+        .card.red .btn-trigger:hover { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 0 20px rgba(255, 59, 59, 0.4); }
 
-        .timestamp {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+        .history-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            padding: 3rem;
+            margin-top: 2rem;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .history-panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
         }
 
-        /* Ambient Background */
-        .ambient-light {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
-            top: -200px;
-            right: -200px;
-            pointer-events: none;
-            z-index: 0;
+        .history-panel h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--red);
+            margin-right: 1rem;
+            border-radius: 2px;
         }
 
-        /* Toast notification */
-        #toast {
+        .signal-item {
+            display: grid;
+            grid-template-columns: 150px 1fr 200px;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: background 0.3s;
+        }
+
+        .signal-item:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .level-tag {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .tag-green { background: rgba(0, 255, 170, 0.1); color: var(--green); border: 1px solid rgba(0, 255, 170, 0.2); }
+        .tag-yellow { background: rgba(255, 221, 0, 0.1); color: var(--yellow); border: 1px solid rgba(255, 221, 0, 0.2); }
+        .tag-red { background: rgba(255, 59, 59, 0.1); color: var(--red); border: 1px solid rgba(255, 59, 59, 0.2); }
+
+        .details { color: var(--text-secondary); font-size: 0.9rem; }
+        .timestamp { color: rgba(255,255,255,0.3); font-size: 0.8rem; text-align: right; }
+
+        @media (max-width: 900px) {
+            .emergency-grid { grid-template-columns: 1fr; }
+            .brand { font-size: 2.5rem; }
+        }
+
+        /* Toast UI */
+        #notification-center {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            background: white;
-            color: black;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: none;
-            z-index: 100;
-            animation: slideUp 0.3s ease;
+            z-index: 1000;
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .toast {
+            background: rgba(255, 255, 255, 0.95);
+            color: black;
+            padding: 1.5rem 2.5rem;
+            border-radius: 20px;
+            font-weight: 800;
+            margin-top: 1rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transform: translateX(120%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
+
+        .toast.show { transform: translateX(0); }
     </style>
 </head>
 <body>
-    <div class="ambient-light"></div>
+    <div class="scanline"></div>
     
     <div class="container">
         <header>
-            <h1>CENTRO DE COMANDO</h1>
-            <p class="subtitle">Protocolo de Despliegue de Emergencia Multicanal</p>
+            <div class="status-badge">SISTEMA EN LÍNEA // MONITOREO ACTIVO</div>
+            <h1 class="brand">VOZ ALERTA</h1>
+            <p style="color: var(--text-secondary); letter-spacing: 4px; font-size: 0.8rem; font-weight: 600;">TERMINAL DE DESPLIEGUE TÁCTICO</p>
         </header>
 
         <div class="emergency-grid">
             <!-- Green Card -->
-            <div class="card green" onclick="sendSignal('GREEN')">
-                <span class="icon">🌿</span>
+            <div class="card green">
+                <div class="icon-container">🌿</div>
                 <h2>CÓDIGO VERDE</h2>
-                <p>Nivel preventivo. Monitoreo estándar y notificación a servicios locales.</p>
-                <button class="btn-trigger">ACTIVAR SEÑAL</button>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Nivel preventivo. Bajo riesgo. Procedimientos de rutina activos.</p>
+                
+                <ul class="services-list">
+                    <li>Clínica Local (Notificada)</li>
+                    <li>Vigilancia Comunitaria (Alerta)</li>
+                    <li>Central de Registro (Bitácora)</li>
+                </ul>
+
+                <button class="btn-trigger" onclick="sendSignal('GREEN')">EJECUTAR PROTOCOLO</button>
             </div>
 
             <!-- Yellow Card -->
-            <div class="card yellow" onclick="sendSignal('YELLOW')">
-                <span class="icon">⚠️</span>
+            <div class="card yellow">
+                <div class="icon-container">⚠️</div>
                 <h2>CÓDIGO AMARILLO</h2>
-                <p>Nivel de alerta intermedia. Movilización de unidades de apoyo preventivo.</p>
-                <button class="btn-trigger">ACTIVAR SEÑAL</button>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Alerta intermedia. Situación en desarrollo. Movilización preventiva.</p>
+                
+                <ul class="services-list">
+                    <li>Cuerpo de Bomberos (Standby)</li>
+                    <li>Servicio de Ambulancia (Ruta)</li>
+                    <li>Protección Civil (Activada)</li>
+                </ul>
+
+                <button class="btn-trigger" onclick="sendSignal('YELLOW')">EJECUTAR PROTOCOLO</button>
             </div>
 
             <!-- Red Card -->
-            <div class="card red" onclick="sendSignal('RED')">
-                <span class="icon">🚨</span>
+            <div class="card red">
+                <div class="icon-container">🚨</div>
                 <h2>CÓDIGO ROJO</h2>
-                <p>Nivel crítico. Despliegue inmediato de todas las unidades de emergencia.</p>
-                <button class="btn-trigger">ACTIVAR SEÑAL</button>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">CRÍTICO. Peligro inminente. Despliegue de fuerza total.</p>
+                
+                <ul class="services-list">
+                    <li>Policía Nacional (Intervención)</li>
+                    <li>Hospital Central (Código Rojo)</li>
+                    <li>Guardia Nacional (Respaldo)</li>
+                </ul>
+
+                <button class="btn-trigger" onclick="sendSignal('RED')">EJECUTAR PROTOCOLO</button>
             </div>
         </div>
 
-        <div class="history">
-            <h3>Registro de Actividad Reciente</h3>
-            <ul class="signal-list" id="signalList">
+        <div class="history-panel">
+            <h3>LOG DE OPERACIONES</h3>
+            <div id="signalList">
                 {% for signal in recent_signals %}
-                <li class="signal-item">
+                <div class="signal-item">
                     <span class="level-tag tag-{{ signal.level|lower }}">{{ signal.get_level_display }}</span>
-                    <span class="timestamp">{{ signal.timestamp|date:"Y-m-d H:i:s" }}</span>
-                </li>
+                    <span class="details">Sistemas de emergencia sincronizados correctamente.</span>
+                    <span class="timestamp">{{ signal.timestamp|date:"d/m/Y H:i:s" }}</span>
+                </div>
+                {% empty %}
+                <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">Sin actividad reciente en el log.</p>
                 {% endfor %}
-            </ul>
+            </div>
         </div>
     </div>
 
-    <div id="toast">Señal enviada correctamente</div>
+    <div id="notification-center"></div>
 
     <script>
         function sendSignal(level) {
@@ -293,43 +378,68 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    showToast(`Señal ${level} Desplegada`);
-                    addSignalToList(data);
-                    
-                    // Visual feedback effect
-                    const body = document.body;
-                    const originalBg = body.style.backgroundColor;
-                    const flashColor = level === 'RED' ? '#220000' : (level === 'YELLOW' ? '#221100' : '#001100');
-                    body.style.backgroundColor = flashColor;
-                    setTimeout(() => body.style.backgroundColor = originalBg, 500);
+                    showNotification(level);
+                    addLogEntry(data);
+                    flashScreen(level);
                 }
             });
         }
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.style.display = 'block';
-            setTimeout(() => toast.style.display = 'none', 3000);
+        function showNotification(level) {
+            const container = document.getElementById('notification-center');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            
+            const icon = level === 'RED' ? '🚨' : (level === 'YELLOW' ? '⚠️' : '🌿');
+            toast.innerHTML = `<span>${icon}</span> PROTOCOLO ${level} INICIADO`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
         }
 
-        function addSignalToList(data) {
+        function addLogEntry(data) {
             const list = document.getElementById('signalList');
-            const item = document.createElement('li');
+            const item = document.createElement('div');
             item.className = 'signal-item';
             
-            let label = data.level === 'GREEN' ? 'Código Verde - Bajo' : 
-                        (data.level === 'YELLOW' ? 'Código Amarillo - Intermedio' : 'Código Rojo - Alto');
+            let label = data.level === 'GREEN' ? 'CÓDIGO VERDE' : 
+                        (data.level === 'YELLOW' ? 'CÓDIGO AMARILLO' : 'CÓDIGO ROJO');
             
             item.innerHTML = `
                 <span class="level-tag tag-${data.level.toLowerCase()}">${label}</span>
+                <span class="details">Despliegue multicanal completado.</span>
                 <span class="timestamp">${data.timestamp}</span>
             `;
-            list.insertBefore(item, list.firstChild);
             
-            if (list.children.length > 10) {
-                list.removeChild(list.lastChild);
-            }
+            // Remove "empty" message if exists
+            if (list.querySelector('p')) list.innerHTML = '';
+            
+            list.insertBefore(item, list.firstChild);
+        }
+
+        function flashScreen(level) {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.pointerEvents = 'none';
+            overlay.style.zIndex = '9999';
+            
+            const color = level === 'RED' ? 'rgba(255,0,0,0.2)' : (level === 'YELLOW' ? 'rgba(255,200,0,0.1)' : 'rgba(0,255,0,0.05)');
+            overlay.style.backgroundColor = color;
+            
+            document.body.appendChild(overlay);
+            setTimeout(() => {
+                overlay.style.transition = 'opacity 0.5s';
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 500);
+            }, 100);
         }
     </script>
 </body>
