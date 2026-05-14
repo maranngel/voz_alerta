@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - Voz Alerta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-secondary: #a0a0a0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4rem 2rem;
+        }
+
+        .container { max-width: 600px; width: 100%; }
+
+        header { margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center; }
+        h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; }
+
+        .back-link { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        .back-link:hover { color: white; }
+
+        form {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 12px;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: rgba(255, 255, 255, 0.4); }
+
+        button {
+            background: white;
+            color: black;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 1rem;
+        }
+
+        button:hover { transform: scale(1.02); background: #eee; }
+
+        .messages { margin-bottom: 1.5rem; list-style: none; }
+        .alert-success { background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 1rem; border-radius: 12px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tu Perfil</h1>
+            <a href="{% url 'dashboard' %}" class="back-link">← Volver al Comando</a>
+        </header>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="alert-success">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Nombre(s)</label>
+                {{ u_form.first_name }}
+            </div>
+
+            <div class="form-group">
+                <label>Apellido(s)</label>
+                {{ u_form.last_name }}
+            </div>
+
+            <div class="form-group">
+                <label>Correo Electrónico</label>
+                {{ u_form.email }}
+            </div>
+
+            <div class="form-group">
+                <label>Número de Identificación</label>
+                {{ p_form.id_number }}
+            </div>
+
+            <div class="form-group">
+                <label>Contacto de Emergencia (Nombre y Teléfono)</label>
+                {{ p_form.emergency_contact }}
+            </div>
+
+            <button type="submit">GUARDAR CAMBIOS</button>
+        </form>
+    </div>
+</body>
+</html>
