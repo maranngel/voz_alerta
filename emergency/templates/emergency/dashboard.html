@@ -1,713 +1,121 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Emergencias de Élite</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bg-color: #050505;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --green: #00ff88;
-            --yellow: #ffcc00;
-            --red: #ff3333;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-        }
+{% extends 'base.html' %}
+{% load static %}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+{% block title %}Centro de Comando - Voz Alerta{% endblock %}
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
-            overflow-x: hidden;
-        }
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            z-index: 1;
-        }
+{% block content %}
+<div class="container">
+    <header class="dashboard-header">
+        <h1>CENTRO DE COMANDO</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">Protocolo de Despliegue de Emergencia Multicanal</p>
+    </header>
 
-        header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: -2px;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #fff, #666);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        p.subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        .emergency-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .card:hover::before {
-            opacity: 1;
-        }
-
-        .card.green:hover { box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1); }
-        .card.yellow:hover { box-shadow: 0 20px 40px rgba(255, 204, 0, 0.1); }
-        .card.red:hover { box-shadow: 0 20px 40px rgba(255, 51, 51, 0.1); }
-
-        .icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            display: block;
-        }
-
-        .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .card p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        .card.green h2 { color: var(--green); }
-        .card.yellow h2 { color: var(--yellow); }
-        .card.red h2 { color: var(--red); }
-
-        .btn-trigger {
-            margin-top: 2rem;
-            background: white;
-            color: black;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .card.green .btn-trigger:hover { background: var(--green); color: black; }
-        .card.yellow .btn-trigger:hover { background: var(--yellow); color: black; }
-        .card.red .btn-trigger:hover { background: var(--red); color: white; }
-
-        .history {
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 2rem;
-        }
-
-        .history h3 {
-            margin-bottom: 1.5rem;
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-        }
-
-        .signal-list {
-            list-style: none;
-        }
-
-        .signal-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-color);
-            animation: fadeIn 0.5s ease;
-        }
-
-        .signal-item:last-child {
-            border-bottom: none;
-        }
-
-        .level-tag {
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .tag-green { background: rgba(0, 255, 136, 0.1); color: var(--green); }
-        .tag-yellow { background: rgba(255, 204, 0, 0.1); color: var(--yellow); }
-        .tag-red { background: rgba(255, 51, 51, 0.1); color: var(--red); }
-
-        .timestamp {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Ambient Background */
-        .ambient-light {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
-            top: -200px;
-            right: -200px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Toast notification */
-        #toast {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: white;
-            color: black;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: none;
-            z-index: 100;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        /* Description Input */
-        .description-container {
-            margin-bottom: 2rem;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .description-input {
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1rem;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .description-input:focus {
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .signal-description {
-            display: block;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-        }
-
-        /* Layout for History and Stats */
-        .dashboard-bottom {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 2rem;
-            width: 100%;
-            margin-bottom: 4rem;
-        }
-
-        .stats-panel {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .stats-panel h3 {
-            margin-bottom: 1.5rem;
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            align-self: flex-start;
-        }
-
-        .chart-container {
-            width: 100%;
-            position: relative;
-        }
-
-        @media (max-width: 900px) {
-            .dashboard-bottom {
-                grid-template-columns: 1fr;
-            }
-        }
-        /* Navbar Styles */
-        nav {
-            width: 100%;
-            max-width: 1000px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .nav-user span {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            transition: 0.3s;
-        }
-
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .nav-link.logout {
-            color: #ff3333;
-        }
-
-        .user-tag {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-left: 0.5rem;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal {
-            background: #111;
-            border: 1px solid var(--border-color);
-            border-radius: 32px;
-            padding: 3rem;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal h2 {
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            letter-spacing: -1px;
-        }
-
-        .modal .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .modal label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .modal input, .modal textarea {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            padding: 1rem;
-            border-radius: 12px;
-            color: white;
-            outline: none;
-            font-family: inherit;
-        }
-
-        .modal .modal-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 1rem;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            border: none;
-        }
-
-        .btn-confirm { background: white; color: black; }
-        .btn-cancel { background: rgba(255, 255, 255, 0.1); color: white; }
-
-        .btn-confirm:hover { transform: scale(1.02); }
-        .btn-cancel:hover { background: rgba(255, 255, 255, 0.2); }
-
-        .patient-info-tag {
-            display: block;
-            font-size: 0.85rem;
-            color: white;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="ambient-light"></div>
-    
-    <div class="container">
-        <nav>
-            <div class="nav-logo">
-                <strong style="letter-spacing: 1px;">VOZ ALERTA</strong>
-                {% if user.is_staff %}
-                <span class="level-tag tag-red" style="margin-left: 0.5rem; font-size: 0.6rem;">ADMIN</span>
-                {% endif %}
-            </div>
-            <div class="nav-user">
-                <span>Hola, <strong>{{ user.first_name|default:user.username }}</strong></span>
-                <a href="{% url 'profile' %}" class="nav-link">Perfil</a>
-                <a href="{% url 'logout' %}" class="nav-link logout">Salir</a>
-            </div>
-        </nav>
-
-        <header>
-            <h1>CENTRO DE COMANDO</h1>
-            <p class="subtitle">Protocolo de Despliegue de Emergencia Multicanal</p>
-        </header>
-
-        <div class="description-container" style="display: none;">
-            <input type="text" id="signalDescription" class="description-input" placeholder="Escribe los detalles de la situación aquí (opcional)...">
+    <div class="emergency-grid">
+        <div class="card green" onclick="openModal('GREEN')">
+            <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+            </span>
+            <h2>CÓDIGO VERDE</h2>
+            <p>Nivel preventivo. Monitoreo estándar y notificación a servicios locales.</p>
+            <button style="margin-top: 2rem; width: 100%;" class="btn-trigger">ACTIVAR SEÑAL</button>
         </div>
 
-        <div class="emergency-grid">
-            <!-- Green Card -->
-            <div class="card green" onclick="openModal('GREEN')">
-                <span class="icon">🌿</span>
-                <h2>CÓDIGO VERDE</h2>
-                <p>Nivel preventivo. Monitoreo estándar y notificación a servicios locales.</p>
-                <button class="btn-trigger">ACTIVAR SEÑAL</button>
-            </div>
-
-            <!-- Yellow Card -->
-            <div class="card yellow" onclick="openModal('YELLOW')">
-                <span class="icon">⚠️</span>
-                <h2>CÓDIGO AMARILLO</h2>
-                <p>Nivel de alerta intermedia. Movilización de unidades de apoyo preventivo.</p>
-                <button class="btn-trigger">ACTIVAR SEÑAL</button>
-            </div>
-
-            <!-- Red Card -->
-            <div class="card red" onclick="openModal('RED')">
-                <span class="icon">🚨</span>
-                <h2>CÓDIGO ROJO</h2>
-                <p>Nivel crítico. Despliegue inmediato de todas las unidades de emergencia.</p>
-                <button class="btn-trigger">ACTIVAR SEÑAL</button>
-            </div>
+        <div class="card yellow" onclick="openModal('YELLOW')">
+            <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </span>
+            <h2>CÓDIGO AMARILLO</h2>
+            <p>Nivel de alerta intermedia. Movilización de unidades de apoyo preventivo.</p>
+            <button style="margin-top: 2rem; width: 100%;" class="btn-trigger">ACTIVAR SEÑAL</button>
         </div>
 
-        <div class="dashboard-bottom">
-            <div class="history">
-                <h3>Registro de Actividad Reciente</h3>
-                <ul class="signal-list" id="signalList">
-                    {% for signal in recent_signals %}
-                    <li class="signal-item">
-                        <div>
+        <div class="card red" onclick="openModal('RED')">
+            <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.2 3.2C10.5 2.5 11.2 2 12 2s1.5.5 1.8 1.2L15 8H9z"/><path d="M19 10a7 7 0 0 0-14 0"/><rect width="18" height="4" x="3" y="14" rx="2"/><path d="M7 14v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-5"/></svg>
+            </span>
+            <h2>CÓDIGO ROJO</h2>
+            <p>Nivel crítico. Despliegue inmediato de todas las unidades de emergencia.</p>
+            <button style="margin-top: 2rem; width: 100%;" class="btn-trigger">ACTIVAR SEÑAL</button>
+        </div>
+    </div>
+
+    <div class="dashboard-bottom">
+        <div class="history">
+            <h3 style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">Actividad Reciente</h3>
+            <ul class="signal-list" id="signalList" style="list-style: none;">
+                {% for signal in recent_signals %}
+                <li class="signal-item">
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
                             <span class="level-tag tag-{{ signal.level|lower }}">{{ signal.get_level_display }}</span>
-                            <span class="user-tag">por 
-                                {% if signal.user %}
-                                    {{ signal.user.first_name|default:signal.user.username }}
-                                {% else %}
-                                    Sistema
-                                {% endif %}
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">por 
+                                <strong>
+                                    {% if signal.user %}
+                                        {{ signal.user.first_name|default:signal.user.username }}
+                                    {% else %}
+                                        Sistema
+                                    {% endif %}
+                                </strong>
                             </span>
-                            {% if signal.patient_name %}
-                            <span class="patient-info-tag">Paciente: {{ signal.patient_name }}</span>
-                            {% endif %}
-                            {% if signal.description %}
-                            <span class="signal-description">{{ signal.description }}</span>
-                            {% endif %}
                         </div>
-                        <span class="timestamp">{{ signal.timestamp|date:"Y-m-d H:i:s" }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
+                        {% if signal.patient_name %}
+                        <span style="font-size: 0.9rem; font-weight: 600;">Paciente: {{ signal.patient_name }}</span>
+                        {% endif %}
+                        {% if signal.description %}
+                        <span style="font-size: 0.85rem; color: var(--text-secondary); font-style: italic;">"{{ signal.description }}"</span>
+                        {% endif %}
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ signal.timestamp|date:"H:i" }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
 
-            <div class="stats-panel">
-                <h3>Distribución de Alertas</h3>
-                <div class="chart-container">
-                    <canvas id="signalsChart"></canvas>
-                </div>
+        <div class="stats-panel" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 32px; padding: 2.5rem;">
+            <h3 style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">Estadísticas</h3>
+            <div class="chart-container">
+                <canvas id="signalsChart"></canvas>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="toast">Señal enviada correctamente</div>
-
-    <!-- Modal de Paciente -->
-    <div id="patientModal" class="modal-overlay">
-        <div class="modal">
-            <h2 id="modalTitle">Datos de Emergencia</h2>
-            <div class="form-group">
-                <label>Nombre del Paciente</label>
-                <input type="text" id="patientName" placeholder="Nombre completo...">
-            </div>
-            <div class="form-group">
-                <label>Edad</label>
-                <input type="number" id="patientAge" placeholder="Ej: 45">
-            </div>
-            <div class="form-group">
-                <label>Descripción de la Situación</label>
-                <textarea id="modalDescription" rows="3" placeholder="Describe los síntomas o situación..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="modal-btn btn-cancel" onclick="closeModal()">CANCELAR</button>
-                <button class="modal-btn btn-confirm" onclick="confirmSignal()">CONFIRMAR SEÑAL</button>
-            </div>
+<!-- Modal de Paciente -->
+<div id="patientModal" class="modal-overlay">
+    <div class="modal">
+        <h2 id="modalTitle" style="margin-bottom: 2rem;">Datos de Emergencia</h2>
+        <div class="form-field">
+            <label>Nombre del Paciente</label>
+            <input type="text" id="patientName" placeholder="Nombre completo...">
+        </div>
+        <div class="form-field">
+            <label>Edad</label>
+            <input type="number" id="patientAge" placeholder="Ej: 45">
+        </div>
+        <div class="form-field">
+            <label>Descripción de la Situación</label>
+            <textarea id="modalDescription" rows="3" placeholder="Describe los síntomas o situación..."></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 3rem;">
+            <button class="btn-cancel" style="flex: 1; background: rgba(255,255,255,0.05); color: white;" onclick="closeModal()">CANCELAR</button>
+            <button class="btn-confirm" style="flex: 1;" onclick="confirmSignal('{% url 'trigger_signal' %}', '{{ csrf_token }}')">CONFIRMAR SEÑAL</button>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        // Chart Initialization
-        const ctx = document.getElementById('signalsChart').getContext('2d');
-        let statsData = {
-            'GREEN': {{ stats.GREEN }},
-            'YELLOW': {{ stats.YELLOW }},
-            'RED': {{ stats.RED }}
-        };
-
-        const signalsChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Verde', 'Amarillo', 'Rojo'],
-                datasets: [{
-                    data: [statsData.GREEN, statsData.YELLOW, statsData.RED],
-                    backgroundColor: ['#00ff88', '#ffcc00', '#ff3333'],
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 2,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#a0a0a0',
-                            font: { family: 'Inter' }
-                        }
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-
-        function updateChart(level) {
-            statsData[level]++;
-            signalsChart.data.datasets[0].data = [statsData.GREEN, statsData.YELLOW, statsData.RED];
-            signalsChart.update();
-        }
-
-        let selectedLevel = null;
-
-        function openModal(level) {
-            selectedLevel = level;
-            const title = document.getElementById('modalTitle');
-            const color = level === 'RED' ? '#ff3333' : (level === 'YELLOW' ? '#ffcc00' : '#00ff88');
-            title.style.color = color;
-            title.innerText = `ACTIVAR ${level} - DATOS DEL PACIENTE`;
-            document.getElementById('patientModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('patientModal').style.display = 'none';
-            // Clear inputs
-            document.getElementById('patientName').value = '';
-            document.getElementById('patientAge').value = '';
-            document.getElementById('modalDescription').value = '';
-        }
-
-        function confirmSignal() {
-            if (selectedLevel) {
-                sendSignal(selectedLevel);
-                closeModal();
-            }
-        }
-
-        function sendSignal(level) {
-            const patientName = document.getElementById('patientName').value;
-            const patientAge = document.getElementById('patientAge').value;
-            const description = document.getElementById('modalDescription').value;
-
-            const formData = new FormData();
-            formData.append('level', level);
-            formData.append('description', description);
-            formData.append('patient_name', patientName);
-            formData.append('patient_age', patientAge);
-            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-            fetch("{% url 'trigger_signal' %}", {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Respuesta del servidor:", data);
-                if (data.status === 'success') {
-                    showToast(`Señal ${level} Desplegada`);
-                    addSignalToList(data);
-                    announceSignal(level, description);
-                    updateChart(level);
-                    
-                    // Clear input
-                    document.getElementById('signalDescription').value = '';
-
-                    // Visual feedback effect
-                    const body = document.body;
-                    const originalBg = body.style.backgroundColor;
-                    const flashColor = level === 'RED' ? '#220000' : (level === 'YELLOW' ? '#221100' : '#001100');
-                    body.style.backgroundColor = flashColor;
-                    setTimeout(() => body.style.backgroundColor = originalBg, 500);
-                }
-            });
-        }
-
-        function announceSignal(level, description) {
-            if (!('speechSynthesis' in window)) return;
-            
-            const levelNames = {
-                'GREEN': 'Código Verde, nivel bajo.',
-                'YELLOW': 'Código Amarillo, nivel intermedio.',
-                'RED': 'Código Rojo, nivel crítico.'
-            };
-
-            let text = `Atención. Se ha activado ${levelNames[level]}`;
-            if (description) {
-                text += ` Detalles: ${description}`;
-            }
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'es-ES';
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.style.display = 'block';
-            setTimeout(() => toast.style.display = 'none', 3000);
-        }
-
-        function addSignalToList(data) {
-            const list = document.getElementById('signalList');
-            const item = document.createElement('li');
-            item.className = 'signal-item';
-            
-            let label = data.level === 'GREEN' ? 'Código Verde - Bajo' : 
-                        (data.level === 'YELLOW' ? 'Código Amarillo - Intermedio' : 'Código Rojo - Alto');
-            
-            let patientHtml = data.patient_name ? `<span class="patient-info-tag">Paciente: ${data.patient_name}</span>` : '';
-            let descriptionHtml = data.description ? `<span class="signal-description">${data.description}</span>` : '';
-
-            item.innerHTML = `
-                <div>
-                    <span class="level-tag tag-${data.level.toLowerCase()}">${label}</span>
-                    <span class="user-tag">por ${data.user}</span>
-                    ${patientHtml}
-                    ${descriptionHtml}
-                </div>
-                <span class="timestamp">${data.timestamp}</span>
-            `;
-            list.insertBefore(item, list.firstChild);
-            
-            if (list.children.length > 10) {
-                list.removeChild(list.lastChild);
-            }
-        }
-    </script>
-</body>
-</html>
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+    statsData = {
+        'GREEN': {{ stats.GREEN|default:0 }},
+        'YELLOW': {{ stats.YELLOW|default:0 }},
+        'RED': {{ stats.RED|default:0 }}
+    };
+    currentChart = initChart(statsData);
+</script>
+{% endblock %}

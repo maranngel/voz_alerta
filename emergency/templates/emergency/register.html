@@ -1,123 +1,63 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voz Alerta - Registro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #050505;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --accent: #ffffff;
-            --text-secondary: #a0a0a0;
-        }
+{% extends 'base.html' %}
+{% load static %}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+{% block title %}Voz Alerta - Registro{% endblock %}
 
-        body {
-            background-color: var(--bg-color);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .register-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(20px);
-            padding: 3rem;
-            border-radius: 32px;
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-        }
-
-        h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -1px; }
-        p { color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.9rem; }
-
-        form { display: flex; flex-direction: column; gap: 1rem; text-align: left; }
-
-        .form-field { display: flex; flex-direction: column; gap: 0.4rem; }
-        label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; }
-
-        input[type="text"], input[type="password"], input[type="email"] {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            padding: 1rem;
-            border-radius: 12px;
-            color: white;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        input:focus { border-color: rgba(255, 255, 255, 0.4); }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-top: 0.5rem;
-            background: rgba(255, 255, 255, 0.02);
-            padding: 0.8rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .checkbox-group input { width: auto; }
-
-        button {
-            background: white;
-            color: black;
-            border: none;
-            padding: 1rem;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 1rem;
-        }
-
-        button:hover { transform: scale(1.02); background: #eee; }
-
-        .footer-links { margin-top: 2rem; font-size: 0.85rem; color: var(--text-secondary); }
-        .footer-links a { color: white; text-decoration: none; font-weight: 600; }
-
-        .errorlist { list-style: none; color: #ff3333; font-size: 0.75rem; margin-top: 0.2rem; }
-        .helptext { font-size: 0.7rem; color: #666; margin-top: 0.2rem; }
-    </style>
-</head>
-<body>
+{% block content %}
+{% with hide_nav=True %}
+<div class="auth-wrapper">
     <div class="register-card">
-        <h1>Únete a Élite</h1>
-        <p>Crea tu cuenta de Voz Alerta</p>
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1>ÚNETE A ÉLITE</h1>
+            <p>Crea tu perfil de mando en Voz Alerta</p>
+        </div>
         
         <form method="POST">
             {% csrf_token %}
             
-            {% for field in form %}
-                <div class="form-field {% if field.name == 'is_admin' %}checkbox-group{% endif %}">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        {{ field.errors }}
-                    {% endif %}
-                    {% if field.help_text %}
-                        <span class="helptext">{{ field.help_text }}</span>
-                    {% endif %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="form-field" style="margin-bottom: 0;">
+                    <label>Nombre de Usuario</label>
+                    {{ form.username }}
                 </div>
-            {% endfor %}
+                <div class="form-field" style="margin-bottom: 0;">
+                    <label>Correo</label>
+                    {{ form.email }}
+                </div>
+            </div>
 
-            <button type="submit">CREAR CUENTA</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="form-field" style="margin-bottom: 0;">
+                    <label>Contraseña</label>
+                    {{ form.password1 }}
+                </div>
+                <div class="form-field" style="margin-bottom: 0;">
+                    <label>Confirmar</label>
+                    {{ form.password2 }}
+                </div>
+            </div>
+
+            <div class="form-field" style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                <div style="flex: 1;">
+                    <label style="margin-bottom: 0;">Privilegios Administrativos</label>
+                    <p style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 0;">Permitir acceso al panel de control total</p>
+                </div>
+                {{ form.is_admin }}
+            </div>
+
+            {% if form.errors %}
+                <div class="level-tag tag-red" style="margin-bottom: 1.5rem; padding: 1rem; width: 100%; border-radius: 12px; font-size: 0.8rem;">
+                    Por favor, corrige los errores en el formulario.
+                </div>
+            {% endif %}
+
+            <button type="submit" style="width: 100%; margin-top: 1rem;">CREAR CUENTA</button>
         </form>
 
-        <div class="footer-links">
-            ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a>
+        <div style="margin-top: 2rem; font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+            ¿Ya eres parte del equipo? <a href="{% url 'login' %}" style="color: white; font-weight: 700;">Inicia sesión</a>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endwith %}
+{% endblock %}

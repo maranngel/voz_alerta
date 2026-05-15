@@ -1,0 +1,4 @@
+Django>=6.0.4
+mysqlclient
+python-dotenv
+chart.js  # Note: chart.js is loaded via CDN, but good to note
