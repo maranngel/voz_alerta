@@ -1,4 +1,10 @@
-// Chart Initialization
+/*
+ * dashboard.js
+ * Controla la lógica del panel de mando, el envío de señales,
+ * la actualización de la gráfica y las notificaciones de usuario.
+ */
+
+// Inicializa el gráfico de pastel con las estadísticas de señales.
 function initChart(stats) {
     const ctx = document.getElementById('signalsChart').getContext('2d');
     const signalsChart = new Chart(ctx, {
@@ -30,10 +36,12 @@ function initChart(stats) {
     return signalsChart;
 }
 
+// Variables globales para el estado del modal y del gráfico.
 let selectedLevel = null;
 let currentChart = null;
 let statsData = null;
 
+// Abre el modal de confirmación de señal y ajusta su título según el nivel.
 function openModal(level) {
     selectedLevel = level;
     const title = document.getElementById('modalTitle');
@@ -43,6 +51,7 @@ function openModal(level) {
     document.getElementById('patientModal').style.display = 'flex';
 }
 
+// Cierra el modal y limpia los campos del formulario.
 function closeModal() {
     document.getElementById('patientModal').style.display = 'none';
     document.getElementById('patientName').value = '';
@@ -50,6 +59,7 @@ function closeModal() {
     document.getElementById('modalDescription').value = '';
 }
 
+// Confirma la señal seleccionada y la envía al servidor.
 function confirmSignal(triggerUrl, csrfToken) {
     if (selectedLevel) {
         sendSignal(selectedLevel, triggerUrl, csrfToken);
@@ -57,6 +67,7 @@ function confirmSignal(triggerUrl, csrfToken) {
     }
 }
 
+// Envía los datos de la señal al servidor mediante un POST.
 function sendSignal(level, triggerUrl, csrfToken) {
     const patientName = document.getElementById('patientName').value;
     const patientAge = document.getElementById('patientAge').value;
@@ -90,6 +101,7 @@ function sendSignal(level, triggerUrl, csrfToken) {
     });
 }
 
+// Actualiza la gráfica localmente cuando se dispara una señal.
 function updateChart(level) {
     if (statsData && currentChart) {
         statsData[level]++;
@@ -98,6 +110,7 @@ function updateChart(level) {
     }
 }
 
+// Reproduce un mensaje de voz cuando se dispara una señal.
 function announceSignal(level, description) {
     if (!('speechSynthesis' in window)) return;
     
@@ -119,6 +132,7 @@ function announceSignal(level, description) {
     window.speechSynthesis.speak(utterance);
 }
 
+// Muestra una notificación breve en pantalla.
 function showToast(message) {
     const toast = document.getElementById('toast');
     toast.innerText = message;
@@ -126,6 +140,7 @@ function showToast(message) {
     setTimeout(() => toast.style.display = 'none', 3000);
 }
 
+// Inserta la nueva señal en la lista de actividad reciente.
 function addSignalToList(data) {
     const list = document.getElementById('signalList');
     const item = document.createElement('li');

@@ -10,12 +10,14 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+    <!-- Efectos visuales de fondo. No afectan la lógica del proyecto. -->
     <div class="ambient-light"></div>
     <div class="ambient-light bottom"></div>
     
     {% if user.is_authenticated and not hide_nav %}
     <div class="container">
         <nav>
+            <!-- Cabecera de navegación con logo y enlaces de usuario -->
             <div class="nav-logo">
                 <a href="{% url 'dashboard' %}" style="color: white; display: flex; align-items: center; gap: 0.8rem;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--red);"><path d="M10.2 3.2C10.5 2.5 11.2 2 12 2s1.5.5 1.8 1.2L15 8H9z"/><path d="M19 10a7 7 0 0 0-14 0"/><rect width="18" height="4" x="3" y="14" rx="2"/><path d="M7 14v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-5"/></svg>
@@ -38,6 +40,7 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Contenedor de mensajes emergentes de notificación. -->
     <div id="toast"></div>
 
     {% block extra_js %}{% endblock %}

@@ -1,18 +1,20 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
-from .models import EmergencySignal, Profile
+from .models import EmergencySignal
 from .forms import UserUpdateForm, ProfileUpdateForm, UserRegisterForm
 
+
 def register_view(request):
+    """Muestra y procesa el formulario de registro de usuarios."""
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            # Si marcó la casilla de admin, le damos permisos
+            # Si el usuario marca la casilla de administrador, se habilitan permisos.
             if form.cleaned_data.get('is_admin'):
                 user.is_staff = True
                 user.is_superuser = True
@@ -22,16 +24,22 @@ def register_view(request):
             return redirect('login')
     else:
         form = UserRegisterForm()
+
+    # Renderiza la plantilla de registro con el formulario.
     return render(request, 'emergency/register.html', {'form': form})
+
 
 @login_required
 def dashboard(request):
-    # Si es admin, ve todo. Si es usuario, ve solo lo suyo.
+    """Genera la vista principal con señales recientes y estadísticas."""
+    # Si el usuario es administrador, muestra todas las señales.
     if request.user.is_staff:
         recent_signals = EmergencySignal.objects.all().order_by('-timestamp')[:20]
     else:
+        # Usuarios normales solo ven sus propias señales.
         recent_signals = EmergencySignal.objects.filter(user=request.user).order_by('-timestamp')[:10]
     
+    # Recuento de señales por color para el gráfico.
     stats = {
         'GREEN': EmergencySignal.objects.filter(level='GREEN').count(),
         'YELLOW': EmergencySignal.objects.filter(level='YELLOW').count(),
@@ -43,8 +51,10 @@ def dashboard(request):
         'stats': stats
     })
 
+
 @login_required
 def trigger_signal(request):
+    """Crea una nueva señal de emergencia desde peticiones AJAX POST."""
     if request.method == 'POST':
         level = request.POST.get('level')
         description = request.POST.get('description', '')
@@ -53,13 +63,14 @@ def trigger_signal(request):
         
         if level in ['GREEN', 'YELLOW', 'RED']:
             signal = EmergencySignal.objects.create(
-                user=request.user, 
-                level=level, 
+                user=request.user,
+                level=level,
                 description=description,
                 patient_name=patient_name,
                 patient_age=patient_age if patient_age else None
             )
             
+            # Mensaje en consola para facilitar el seguimiento de las alertas.
             print(f"\n[ALERTA DISPARADA] Paciente: {patient_name} | Nivel: {level}")
             
             return JsonResponse({
@@ -70,10 +81,14 @@ def trigger_signal(request):
                 'user': request.user.get_full_name() or request.user.username,
                 'timestamp': signal.timestamp.strftime('%Y-%m-%d %H:%M:%S')
             })
+
+    # Si no es POST o el nivel no es válido, devuelve error.
     return JsonResponse({'status': 'error'}, status=400)
+
 
 @login_required
 def profile_view(request):
+    """Permite al usuario actualizar datos de su perfil y de su cuenta."""
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
@@ -92,10 +107,14 @@ def profile_view(request):
     }
     return render(request, 'emergency/profile.html', context)
 
+
 class CustomLoginView(LoginView):
+    """Vista de inicio de sesión personalizada que usa la plantilla definida."""
     template_name = 'emergency/login.html'
     redirect_authenticated_user = True
 
+
 def logout_view(request):
+    """Cierra sesión y redirige al usuario a la página de inicio de sesión."""
     logout(request)
     return redirect('login')
