@@ -2,32 +2,48 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- Metadatos básicos del documento HTML5 -->
     <meta charset="UTF-8">
+    <!-- Configuración del viewport para asegurar que el diseño sea responsive en dispositivos móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Título de la página dinámico: si una plantilla hija define el bloque 'title', se sobreescribe, sino usa el default -->
     <title>{% block title %}Voz Alerta{% endblock %}</title>
+    
+    <!-- Importación de la fuente tipográfica 'Inter' desde Google Fonts para un diseño moderno -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Enlace a la hoja de estilos global usando el tag 'static' de Django -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- Bloque dinámico para inyectar etiquetas <head> adicionales desde plantillas hijas (como scripts de librerías) -->
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <!-- Efectos visuales de fondo. No afectan la lógica del proyecto. -->
+    <!-- Efectos visuales de fondo (luces ambientales estilo neón). No afectan la lógica del proyecto, solo estética. -->
     <div class="ambient-light"></div>
     <div class="ambient-light bottom"></div>
     
+    <!-- Barra de navegación: Se muestra solo si el usuario ha iniciado sesión y la variable 'hide_nav' no es Verdadera -->
     {% if user.is_authenticated and not hide_nav %}
     <div class="container">
         <nav>
-            <!-- Cabecera de navegación con logo y enlaces de usuario -->
+            <!-- Lado izquierdo de la navegación: Logo y enlace al inicio -->
             <div class="nav-logo">
                 <a href="{% url 'dashboard' %}" style="color: white; display: flex; align-items: center; gap: 0.8rem;">
+                    <!-- Ícono SVG para el logo del proyecto -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--red);"><path d="M10.2 3.2C10.5 2.5 11.2 2 12 2s1.5.5 1.8 1.2L15 8H9z"/><path d="M19 10a7 7 0 0 0-14 0"/><rect width="18" height="4" x="3" y="14" rx="2"/><path d="M7 14v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-5"/></svg>
                     <span>VOZ ALERTA</span>
                 </a>
+                <!-- Etiqueta de 'ADMIN' exclusiva para usuarios con permisos is_staff -->
                 {% if user.is_staff %}
                 <span class="level-tag tag-red" style="font-size: 0.6rem; letter-spacing: 1px;">ADMIN</span>
                 {% endif %}
             </div>
+            
+            <!-- Lado derecho de la navegación: Saludo y menús de usuario -->
             <div class="nav-user">
+                <!-- Saluda con el primer nombre si existe, o el username por defecto -->
                 <span>Hola, <strong>{{ user.first_name|default:user.username }}</strong></span>
                 <a href="{% url 'profile' %}" class="nav-link">Perfil</a>
                 <a href="{% url 'logout' %}" class="nav-link logout">Salir</a>
@@ -36,13 +52,15 @@
     </div>
     {% endif %}
 
+    <!-- Contenedor principal dinámico: Aquí es donde las plantillas hijas inyectan su contenido -->
     <main>
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Contenedor de mensajes emergentes de notificación. -->
+    <!-- Contenedor vacío reservado para inyectar mensajes emergentes (Toasts) mediante JavaScript -->
     <div id="toast"></div>
 
+    <!-- Bloque dinámico para inyectar archivos JavaScript específicos desde plantillas hijas al final del Body -->
     {% block extra_js %}{% endblock %}
 </body>
 </html>
