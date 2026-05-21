@@ -19,12 +19,16 @@
         <p style="color: var(--text-secondary); font-size: 1.1rem;">Protocolo de Despliegue de Emergencia Multicanal</p>
     </header>
 
-    <!-- Contenedor Grid con los 3 botones principales para activar alertas -->
+    <!-- Contenedor con los 3 botones principales para activar alertas -->
     <div class="emergency-grid">
         <!-- Tarjeta de Código Verde. Llama a la función JavaScript openModal() pasándole el tipo de alerta -->
         <div class="card green" onclick="openModal('GREEN')">
             <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                    <path d="m9 12 2 2 4-4" />
+                </svg>
             </span>
             <h2>CÓDIGO VERDE</h2>
             <p>Nivel preventivo. Monitoreo estándar y notificación a servicios locales.</p>
@@ -34,7 +38,12 @@
         <!-- Tarjeta de Código Amarillo -->
         <div class="card yellow" onclick="openModal('YELLOW')">
             <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                    <path d="M12 9v4" />
+                    <path d="M12 17h.01" />
+                </svg>
             </span>
             <h2>CÓDIGO AMARILLO</h2>
             <p>Nivel de alerta intermedia. Movilización de unidades de apoyo preventivo.</p>
@@ -44,7 +53,13 @@
         <!-- Tarjeta de Código Rojo -->
         <div class="card red" onclick="openModal('RED')">
             <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.2 3.2C10.5 2.5 11.2 2 12 2s1.5.5 1.8 1.2L15 8H9z"/><path d="M19 10a7 7 0 0 0-14 0"/><rect width="18" height="4" x="3" y="14" rx="2"/><path d="M7 14v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.2 3.2C10.5 2.5 11.2 2 12 2s1.5.5 1.8 1.2L15 8H9z" />
+                    <path d="M19 10a7 7 0 0 0-14 0" />
+                    <rect width="18" height="4" x="3" y="14" rx="2" />
+                    <path d="M7 14v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-5" />
+                </svg>
             </span>
             <h2>CÓDIGO ROJO</h2>
             <p>Nivel crítico. Despliegue inmediato de todas las unidades de emergencia.</p>
@@ -54,10 +69,12 @@
 
     <!-- Sección inferior: Historial a la izquierda y Gráfica a la derecha -->
     <div class="dashboard-bottom">
-        
+
         <!-- Panel del historial de señales recientes -->
         <div class="history">
-            <h3 style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">Actividad Reciente</h3>
+            <h3
+                style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">
+                Actividad Reciente</h3>
             <!-- Lista <ul> donde JavaScript agregará dinámicamente nuevos items sin recargar -->
             <ul class="signal-list" id="signalList" style="list-style: none;">
                 <!-- Iteramos sobre las alertas que nos envió views.py desde la base de datos -->
@@ -67,13 +84,16 @@
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <!-- Etiqueta de color del nivel (por ejemplo: verde, amarillo, rojo) -->
                             <span class="level-tag tag-{{ signal.level|lower }}">{{ signal.get_level_display }}</span>
-                            <!-- Mostramos qué usuario generó esta alerta -->
-                            <span style="font-size: 0.8rem; color: var(--text-secondary);">por 
+                            <!-- Mostramos qué usuario generó esta alerta.
+                                 Proviene de la relación 'user' (modelo User de Django) definida en el modelo 'EmergencySignal'.
+                                 - Si el usuario existe, se intenta mostrar su nombre ('first_name'). Si está vacío, el filtro '|default' usa su nombre de usuario ('username').
+                                 - Si la alerta no tiene un usuario asignado (valor nulo), muestra 'Sistema'. -->
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">por
                                 <strong>
                                     {% if signal.user %}
-                                        {{ signal.user.first_name|default:signal.user.username }}
+                                    {{ signal.user.first_name|default:signal.user.username }}
                                     {% else %}
-                                        Sistema
+                                    Sistema
                                     {% endif %}
                                 </strong>
                             </span>
@@ -84,19 +104,24 @@
                         {% endif %}
                         <!-- Si se ingresó una descripción extra, la mostramos en itálicas -->
                         {% if signal.description %}
-                        <span style="font-size: 0.85rem; color: var(--text-secondary); font-style: italic;">"{{ signal.description }}"</span>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary); font-style: italic;">"{{
+                            signal.description }}"</span>
                         {% endif %}
                     </div>
                     <!-- Fecha formateada solo con Horas y Minutos -->
-                    <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ signal.timestamp|date:"H:i" }}</span>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ signal.timestamp|date:"H:i"
+                        }}</span>
                 </li>
                 {% endfor %}
             </ul>
         </div>
 
         <!-- Panel de estadísticas (Gráfica de Rosquilla) -->
-        <div class="stats-panel" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 32px; padding: 2.5rem;">
-            <h3 style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">Estadísticas</h3>
+        <div class="stats-panel"
+            style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 32px; padding: 2.5rem;">
+            <h3
+                style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">
+                Estadísticas</h3>
             <div class="chart-container">
                 <!-- Este canvas es donde Chart.js dibuja el gráfico -->
                 <canvas id="signalsChart"></canvas>
@@ -112,7 +137,7 @@
     <div class="modal">
         <!-- Título que cambiará por JS dependiendo del nivel que se vaya a enviar -->
         <h2 id="modalTitle" style="margin-bottom: 2rem;">Datos de Emergencia</h2>
-        
+
         <div class="form-field">
             <label>Nombre del Paciente</label>
             <input type="text" id="patientName" placeholder="Nombre completo...">
@@ -125,12 +150,14 @@
             <label>Descripción de la Situación</label>
             <textarea id="modalDescription" rows="3" placeholder="Describe los síntomas o situación..."></textarea>
         </div>
-        
+
         <div style="display: flex; gap: 1rem; margin-top: 3rem;">
             <!-- Botón para cerrar el modal sin enviar la señal -->
-            <button class="btn-cancel" style="flex: 1; background: rgba(255,255,255,0.05); color: white;" onclick="closeModal()">CANCELAR</button>
+            <button class="btn-cancel" style="flex: 1; background: rgba(255,255,255,0.05); color: white;"
+                onclick="closeModal()">CANCELAR</button>
             <!-- Botón para confirmar: llama a confirmSignal() inyectándole la URL correcta mediante el tag 'url' de Django y el token CSRF obligatorio -->
-            <button class="btn-confirm" style="flex: 1;" onclick="confirmSignal('{% url 'trigger_signal' %}', '{{ csrf_token }}')">CONFIRMAR SEÑAL</button>
+            <button class="btn-confirm" style="flex: 1;"
+                onclick="confirmSignal('{% url 'trigger_signal' %}', '{{ csrf_token }}')">CONFIRMAR SEÑAL</button>
         </div>
     </div>
 </div>
@@ -144,9 +171,9 @@
     // Puente entre el Backend de Django y el Frontend. 
     // Convertimos las estadísticas contadas en views.py a un objeto JSON puro en JavaScript.
     statsData = {
-        'GREEN': {{ stats.GREEN|default:0 }},
-        'YELLOW': {{ stats.YELLOW|default:0 }},
-        'RED': {{ stats.RED|default:0 }}
+        'GREEN': {{ stats.GREEN |default: 0 }},
+    'YELLOW': { { stats.YELLOW |default: 0 } },
+    'RED': { { stats.RED |default: 0 } }
     };
     // Inicializamos la gráfica de Chart.js con los datos reales provenientes de la base de datos
     currentChart = initChart(statsData);
